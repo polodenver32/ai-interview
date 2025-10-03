@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
         "56AoDkrOh6qfVPDXZ7Pt", // Your voice ID
         {
           text: aiResponse,
+          modelId: "eleven_flash_v2_5",
           outputFormat: "mp3_44100_128", // Use MP3 for better compatibility
         }
       );
