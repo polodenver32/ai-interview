@@ -2,19 +2,21 @@
 
 import { useState, useRef, useEffect } from "react";
 
-export default function VoiceCaptureWidget() {
+export default function Home() {
   const [isRecording, setIsRecording] = useState(false);
   const [status, setStatus] = useState("Click Start to begin recording");
+  const [transcript, setTranscript] = useState("");
+  const [aiResponse, setAiResponse] = useState("");
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    audioRef.current = new Audio();
+    
     return () => {
-      // Cleanup
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
       }
@@ -22,42 +24,52 @@ export default function VoiceCaptureWidget() {
     };
   }, []);
 
-  const detectSilence = (analyser: AnalyserNode, callback: () => void) => {
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(dataArray);
-
-    // Calculate average volume
-    let sum = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-      sum += dataArray[i];
-    }
-    const average = sum / dataArray.length;
-
-    // If volume is below threshold, consider it silence
-    if (average < 10) {
-      // Adjust this threshold as needed
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
+  const playAudio = (base64Audio: string, format: string = 'mp3') => {
+    try {
+      const audioBlob = base64ToBlob(base64Audio, `audio/${format}`);
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      if (audioRef.current) {
+        audioRef.current.src = audioUrl;
+        audioRef.current.play().catch(error => {
+          console.error("Error playing audio:", error);
+        });
+        
+        audioRef.current.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          setStatus("Ready for next conversation");
+        };
       }
-      silenceTimerRef.current = setTimeout(callback, 2000); // 2 seconds of silence
-    } else {
-      // Sound detected, reset silence timer
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-      }
+    } catch (error) {
+      console.error("Error playing audio:", error);
     }
+  };
 
-    // Continue monitoring
-    if (isRecording) {
-      requestAnimationFrame(() => detectSilence(analyser, callback));
+  const base64ToBlob = (base64: string, mimeType: string) => {
+    const byteCharacters = atob(base64);
+    const byteArrays = [];
+    
+    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+      const slice = byteCharacters.slice(offset, offset + 512);
+      const byteNumbers = new Array(slice.length);
+      
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
     }
+    
+    return new Blob(byteArrays, { type: mimeType });
   };
 
   const startRecording = async () => {
     try {
       setStatus("Starting microphone...");
+      setTranscript("");
+      setAiResponse("");
 
-      // Request microphone permission
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -67,14 +79,6 @@ export default function VoiceCaptureWidget() {
       });
       streamRef.current = stream;
 
-      // Setup audio context for silence detection
-      audioContextRef.current = new AudioContext();
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-      analyserRef.current = audioContextRef.current.createAnalyser();
-      analyserRef.current.fftSize = 256;
-      source.connect(analyserRef.current);
-
-      // Setup media recorder
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -85,74 +89,105 @@ export default function VoiceCaptureWidget() {
         }
       };
 
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, {
-          type: "audio/wav",
-        });
-
-        // Create download link
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const a = document.createElement("a");
-        a.href = audioUrl;
-        a.download = `recording-${new Date().getTime()}.wav`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(audioUrl);
-
-        setStatus("Recording saved! Click Start to record again");
-      };
-
-      // Start recording
       mediaRecorder.start();
       setIsRecording(true);
       setStatus("Recording... Speak now");
 
-      // Start silence detection
-      if (analyserRef.current) {
-        detectSilence(analyserRef.current, () => {
-          setStatus("Silence detected - stopping recording");
-          stopRecording();
-        });
-      }
+      resetSilenceTimer();
     } catch (error) {
       console.error("Error starting recording:", error);
       setStatus("Error accessing microphone");
     }
   };
 
-  const stopRecording = () => {
+  const resetSilenceTimer = () => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+    }
+
+    silenceTimerRef.current = setTimeout(() => {
+      if (isRecording) {
+        setStatus("Silence detected - processing...");
+        stopRecording();
+      }
+    }, 2000);
+  };
+
+  const stopRecording = async () => {
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
     }
 
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state === "recording"
-    ) {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
-    }
 
-    // Stop all audio tracks
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
+      mediaRecorderRef.current.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: "audio/wav",
+        });
 
-    // Close audio context
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
+        await sendToSpeechToText(audioBlob);
 
-    setIsRecording(false);
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+          streamRef.current = null;
+        }
+
+        setIsRecording(false);
+      };
+    } else {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+      setIsRecording(false);
+      setStatus("Recording stopped");
+    }
+  };
+
+  const sendToSpeechToText = async (audioBlob: Blob) => {
+    try {
+      setStatus("Processing...");
+
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "recording.wav");
+
+      const response = await fetch("/api/main", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("API request failed");
+      }
+
+      const data = await response.json();
+      console.log("API response:", data);
+
+      if (data.success) {
+        setTranscript(data.transcript);
+        setAiResponse(data.aiResponse);
+        
+        if (data.audio) {
+          setStatus("Playing AI response...");
+          playAudio(data.audio, data.audioFormat);
+        } else {
+          setStatus("Conversion complete!");
+        }
+      } else {
+        setStatus("Error in processing");
+      }
+    } catch (error) {
+      console.error("Error sending to API:", error);
+      setStatus("Error processing speech");
+    }
   };
 
   const handleButtonClick = () => {
     if (isRecording) {
+      setStatus("Stopping manually...");
       stopRecording();
-      setStatus("Stopped manually");
     } else {
       startRecording();
     }
@@ -162,7 +197,7 @@ export default function VoiceCaptureWidget() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-4 text-gray-800">
-          Audio Capture Widget
+          AI Voice Assistant
         </h1>
 
         <div className="mb-6">
@@ -181,6 +216,20 @@ export default function VoiceCaptureWidget() {
               </div>
             )}
           </div>
+
+          {transcript && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <h3 className="font-semibold text-blue-800 mb-2">You said:</h3>
+              <p className="text-blue-700">{transcript}</p>
+            </div>
+          )}
+
+          {aiResponse && (
+            <div className="mt-4 p-4 bg-green-50 rounded-lg">
+              <h3 className="font-semibold text-green-800 mb-2">AI Response:</h3>
+              <p className="text-green-700">{aiResponse}</p>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-center">
@@ -198,13 +247,9 @@ export default function VoiceCaptureWidget() {
 
         <div className="mt-6 text-sm text-gray-600 space-y-2">
           <p className="text-center">
-            {isRecording ? "🎤 Recording audio..." : "✅ Ready to record audio"}
-          </p>
-          <p className="text-center">
-            Recording will automatically stop after 2 seconds of silence
-          </p>
-          <p className="text-center text-xs">
-            Audio will be saved as WAV file when recording stops
+            {isRecording
+              ? "🎤 Speak now - will auto-stop after silence"
+              : "✅ Ready to chat with AI"}
           </p>
         </div>
       </div>
