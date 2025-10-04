@@ -10,7 +10,7 @@ export default function Home() {
     { role: string; content: string }[]
   >([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [lastAIResponse, setLastAIResponse] = useState<string>("");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -28,25 +28,85 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (
-      finalTranscript &&
-      finalTranscript.trim() !== "" &&
-      !isProcessing &&
-      !isPlayingAudio
-    ) {
-      console.log("✅ User said:", finalTranscript);
+    if (finalTranscript && finalTranscript.trim() !== "" && !isProcessing) {
+      console.log("🎤 RAW SPEECH DETECTED:", finalTranscript);
+
+      // Check if this matches the last AI response
+      if (lastAIResponse) {
+        const similarity = calculateSimilarity(finalTranscript, lastAIResponse);
+        console.log(`🔍 SIMILARITY CHECK:`);
+        console.log(`   Detected: "${finalTranscript}"`);
+        console.log(`   AI Response: "${lastAIResponse}"`);
+        console.log(`   Similarity: ${(similarity * 100).toFixed(1)}%`);
+
+        if (similarity > 0.4) {
+          // Lowered threshold to 40%
+          console.log(
+            `🚫 IGNORING - AI SPEECH DETECTED (${(similarity * 100).toFixed(
+              1
+            )}% match)`
+          );
+          resetTranscript();
+          return;
+        } else {
+          console.log(
+            `✅ ACCEPTING - USER SPEECH (${(similarity * 100).toFixed(
+              1
+            )}% match)`
+          );
+        }
+      } else {
+        console.log("✅ ACCEPTING - NO PREVIOUS AI RESPONSE TO COMPARE");
+      }
+
       processUserMessage(finalTranscript);
       resetTranscript();
     }
-  }, [finalTranscript, isProcessing, isPlayingAudio]);
+  }, [finalTranscript, isProcessing, lastAIResponse]);
+
+  // Enhanced similarity calculation
+  const calculateSimilarity = (text1: string, text2: string): number => {
+    if (!text1 || !text2) return 0;
+
+    // Clean and normalize texts
+    const cleanText1 = text1
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const cleanText2 = text2
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    console.log(`   Cleaned detected: "${cleanText1}"`);
+    console.log(`   Cleaned AI: "${cleanText2}"`);
+
+    const words1 = cleanText1.split(" ");
+    const words2 = cleanText2.split(" ");
+
+    const set1 = new Set(words1);
+    const set2 = new Set(words2);
+
+    const intersection = new Set([...set1].filter((x) => set2.has(x)));
+    const union = new Set([...set1, ...set2]);
+
+    const similarity = union.size > 0 ? intersection.size / union.size : 0;
+
+    console.log(`   Words intersection: ${intersection.size}`);
+    console.log(`   Words union: ${union.size}`);
+    console.log(`   Calculated similarity: ${(similarity * 100).toFixed(1)}%`);
+
+    return similarity;
+  };
 
   const startListening = () => {
-    if (!isPlayingAudio) {
-      SpeechRecognition.startListening({
-        continuous: true,
-        language: "en-US",
-      });
-    }
+    SpeechRecognition.startListening({
+      continuous: true,
+      language: "en-US",
+    });
   };
 
   const stopListening = () => {
@@ -54,13 +114,12 @@ export default function Home() {
   };
 
   const processUserMessage = async (userMessage: string) => {
-    if (isProcessing || !userMessage.trim()) return;
+    if (isProcessing) return;
 
     setIsProcessing(true);
-    stopListening(); // Stop listening while processing
 
     try {
-      console.log("📨 Sending to API - User message:", userMessage);
+      console.log("📨 SENDING TO API - User message:", userMessage);
 
       const response = await fetch("/api/main", {
         method: "POST",
@@ -77,11 +136,15 @@ export default function Home() {
         throw new Error(`API request failed: ${response.status}`);
 
       const data = await response.json();
-      console.log("✅ API response received:");
-      console.log("- User message:", data.userMessage);
-      console.log("- AI response:", data.aiResponse);
+      console.log("✅ API RESPONSE RECEIVED");
+      console.log("   User message:", data.userMessage);
+      console.log("   AI response:", data.aiResponse);
 
       if (data.success && data.aiResponse) {
+        // Store the AI response for comparison
+        setLastAIResponse(data.aiResponse);
+        console.log("💾 STORED AI RESPONSE FOR COMPARISON:", data.aiResponse);
+
         // Add user message and AI response to conversation
         setConversation((prev) => [
           ...prev,
@@ -90,24 +153,13 @@ export default function Home() {
         ]);
 
         if (data.audio) {
-          // Stop listening before playing audio
-          stopListening();
-          setIsPlayingAudio(true);
+          console.log("🔊 PLAYING AI AUDIO RESPONSE");
           await playAudio(data.audio, data.audioFormat);
-          setIsPlayingAudio(false);
-
-          // Restart listening after audio finishes
-          if (!isProcessing) {
-            startListening();
-          }
+          console.log("🔊 AI AUDIO FINISHED PLAYING");
         }
       }
     } catch (error) {
-      console.error("❌ Error processing speech:", error);
-      // Restart listening on error
-      if (!isProcessing) {
-        startListening();
-      }
+      console.error("❌ ERROR PROCESSING SPEECH:", error);
     } finally {
       setIsProcessing(false);
     }
@@ -127,21 +179,24 @@ export default function Home() {
           audioRef.current
             .play()
             .then(() => {
+              console.log("▶️ AUDIO PLAYBACK STARTED");
               audioRef.current!.onended = () => {
+                console.log("⏹️ AUDIO PLAYBACK ENDED");
                 URL.revokeObjectURL(audioUrl);
                 resolve();
               };
             })
             .catch((error) => {
-              console.error("Error playing audio:", error);
+              console.error("❌ ERROR PLAYING AUDIO:", error);
               URL.revokeObjectURL(audioUrl);
               resolve();
             });
         } else {
+          console.log("❌ NO AUDIO ELEMENT");
           resolve();
         }
       } catch (error) {
-        console.error("Error in playAudio:", error);
+        console.error("❌ ERROR IN playAudio:", error);
         resolve();
       }
     });
@@ -168,14 +223,18 @@ export default function Home() {
 
   const handleButtonClick = () => {
     if (listening) {
+      console.log("⏸️ MANUALLY PAUSING LISTENER");
       stopListening();
     } else {
+      console.log("▶️ STARTING LISTENER");
       startListening();
     }
   };
 
   const clearConversation = () => {
+    console.log("🧹 CLEARING CONVERSATION AND AI RESPONSE");
     setConversation([]);
+    setLastAIResponse("");
     resetTranscript();
   };
 
@@ -199,34 +258,30 @@ export default function Home() {
         <div className="mb-6">
           <div
             className={`p-4 rounded-lg text-center ${
-              listening && !isPlayingAudio
+              listening
                 ? "bg-red-100 text-red-800 border border-red-300"
                 : "bg-gray-100 text-gray-600"
             }`}
           >
             <div className="font-semibold mb-2">
-              {isPlayingAudio
-                ? "🔊 AI is speaking..."
-                : isProcessing
+              {isProcessing
                 ? "⏳ Processing..."
                 : listening
-                ? "🎤 Listening... Speak now"
-                : "Ready to talk"}
+                ? "🎤 Always Listening..."
+                : "Ready - Click Start"}
             </div>
-            {listening && !isPlayingAudio && (
+            {listening && (
               <div className="flex justify-center items-center space-x-1">
                 <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
-                <div className="text-sm">● LIVE</div>
+                <div className="text-sm">● ALWAYS ON</div>
               </div>
             )}
           </div>
 
           {/* Interim transcript */}
-          {interimTranscript && !isPlayingAudio && (
+          {interimTranscript && (
             <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
-              <h3 className="font-semibold text-yellow-800 mb-1">
-                Listening...
-              </h3>
+              <h3 className="font-semibold text-yellow-800 mb-1">Listening:</h3>
               <p className="text-yellow-700">{interimTranscript}</p>
             </div>
           )}
@@ -264,31 +319,19 @@ export default function Home() {
         <div className="flex justify-center space-x-4">
           <button
             onClick={handleButtonClick}
-            disabled={isPlayingAudio}
             className={`px-8 py-4 rounded-full font-bold text-white transition-all ${
-              listening && !isPlayingAudio
+              listening
                 ? "bg-red-500 hover:bg-red-600 shadow-lg"
-                : isPlayingAudio
-                ? "bg-gray-400 cursor-not-allowed"
                 : "bg-green-500 hover:bg-green-600"
             }`}
           >
-            {isPlayingAudio
-              ? "AI SPEAKING"
-              : listening
-              ? "STOP"
-              : "START TALKING"}
+            {listening ? "PAUSE" : "START"}
           </button>
 
           {conversation.length > 0 && (
             <button
               onClick={clearConversation}
-              disabled={isPlayingAudio}
-              className={`px-6 py-4 rounded-full font-bold transition-all ${
-                isPlayingAudio
-                  ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                  : "bg-gray-500 text-white hover:bg-gray-600"
-              }`}
+              className="px-6 py-4 bg-gray-500 text-white rounded-full font-bold hover:bg-gray-600 transition-all"
             >
               Clear
             </button>
@@ -301,7 +344,7 @@ export default function Home() {
             {conversation.filter((msg) => msg.role === "user").length}
           </p>
           <p className="text-xs mt-1">
-            {isPlayingAudio && "Microphone disabled while AI is speaking"}
+            Check browser console for detailed similarity logs
           </p>
         </div>
       </div>
