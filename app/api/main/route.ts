@@ -4,45 +4,34 @@ import main from "@/lib/gemini/init";
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const audioFile = formData.get("audio") as File;
+    const { userMessage, conversationHistory } = await request.json();
 
-    if (!audioFile) {
+    if (!userMessage) {
       return NextResponse.json(
-        { error: "No audio file provided" },
+        { error: "No user message provided" },
         { status: 400 }
       );
     }
 
-    // Convert File to Buffer for ElevenLabs
-    const arrayBuffer = await audioFile.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    console.log("📨 User message:", userMessage);
+    console.log(
+      "💭 Conversation history length:",
+      conversationHistory?.length || 0
+    );
 
-    // Call ElevenLabs speech-to-text
-    const response = (await elevenlabs.speechToText.convert({
-      modelId: "scribe_v1",
-      file: buffer,
-    })) as any;
-
-    console.log("Full response:", response);
-
-    const transcriptText = response.text;
-    console.log("Extracted transcript:", transcriptText);
-
-    // Get AI response from Gemini
-    const aiResponse = await main(transcriptText);
-    console.log("AI Response:", aiResponse);
+    // Get AI response from Gemini with proper context
+    const aiResponse = await main(userMessage, conversationHistory);
+    console.log("🤖 AI response:", aiResponse);
 
     let audioBuffer = null;
 
     if (aiResponse) {
-      // Convert AI response to speech - returns a ReadableStream
+      // Convert AI response to speech
       const ttsResponse = await elevenlabs.textToSpeech.convert(
-        "56AoDkrOh6qfVPDXZ7Pt", // Your voice ID
+        "56AoDkrOh6qfVPDXZ7Pt",
         {
           text: aiResponse,
-          modelId: "eleven_flash_v2_5",
-          outputFormat: "mp3_44100_128", // Use MP3 for better compatibility
+          outputFormat: "mp3_44100_128",
         }
       );
 
@@ -56,7 +45,6 @@ export async function POST(request: NextRequest) {
         chunks.push(value);
       }
 
-      // Combine all chunks into a single Uint8Array
       const audioData = new Uint8Array(
         chunks.reduce((acc, chunk) => acc + chunk.length, 0)
       );
@@ -67,13 +55,12 @@ export async function POST(request: NextRequest) {
       }
 
       audioBuffer = Buffer.from(audioData);
-      console.log("Audio generated:", audioBuffer.length, "bytes");
     }
 
     return NextResponse.json({
       success: true,
-      transcript: transcriptText,
-      aiResponse: aiResponse,
+      userMessage: userMessage, // This is the original user message
+      aiResponse: aiResponse, // This is the AI response
       audio: audioBuffer ? audioBuffer.toString("base64") : null,
       audioFormat: "mp3",
     });
