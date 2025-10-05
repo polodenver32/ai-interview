@@ -10,7 +10,7 @@ export default function Home() {
     { role: string; content: string }[]
   >([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [lastAIResponse, setLastAIResponse] = useState<string>("");
+  const [lastAIResponse, setLastAIResponse] = usetate<string>("");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
