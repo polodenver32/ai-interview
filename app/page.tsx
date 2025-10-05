@@ -15,7 +15,6 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const {
-    transcript,
     interimTranscript,
     finalTranscript,
     listening,
@@ -242,7 +241,7 @@ export default function Home() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-red-500 text-xl">
-          Browser doesn't support speech recognition.
+          Browser doesn&apost support speech recognition.
         </div>
       </div>
     );
