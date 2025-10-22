@@ -1,101 +1,388 @@
-import Image from "next/image";
+"use client";
+// pages/index.js
+import { useState } from "react";
+import Head from "next/head";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [selectedProvider, setSelectedProvider] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Data structure: Providers with their models (apps)
+  const providers = [
+    {
+      id: "openai",
+      name: "OpenAI",
+      icon: "🔵",
+      category: "Language & Image",
+      models: [
+        {
+          id: "gpt-4",
+          name: "GPT-4",
+          icon: "🧠",
+          description: "Most capable AI model for complex tasks",
+          rating: 4.9,
+          credits: 5,
+          category: "Language",
+        },
+        {
+          id: "gpt-3.5",
+          name: "GPT-3.5 Turbo",
+          icon: "⚡",
+          description: "Fast and efficient for everyday tasks",
+          rating: 4.7,
+          credits: 2,
+          category: "Language",
+        },
+        {
+          id: "dall-e",
+          name: "DALL-E 3",
+          icon: "🎨",
+          description: "Create images from text descriptions",
+          rating: 4.8,
+          credits: 8,
+          category: "Image",
+        },
+        {
+          id: "whisper",
+          name: "Whisper",
+          icon: "🎤",
+          description: "Speech-to-text transcription",
+          rating: 4.6,
+          credits: 3,
+          category: "Audio",
+        },
+      ],
+    },
+    {
+      id: "midjourney",
+      name: "MidJourney",
+      icon: "🌈",
+      category: "Image",
+      models: [
+        {
+          id: "midjourney-v6",
+          name: "MidJourney v6",
+          icon: "🖼️",
+          description: "Latest version with enhanced realism",
+          rating: 4.9,
+          credits: 10,
+          category: "Image",
+        },
+        {
+          id: "niji-journey",
+          name: "Niji Journey",
+          icon: "🎎",
+          description: "Anime and illustrative style generation",
+          rating: 4.8,
+          credits: 8,
+          category: "Image",
+        },
+      ],
+    },
+    {
+      id: "elevenlabs",
+      name: "ElevenLabs",
+      icon: "🔊",
+      category: "Audio",
+      models: [
+        {
+          id: "voice-cloning",
+          name: "Voice Cloning",
+          icon: "👤",
+          description: "Clone and replicate any voice",
+          rating: 4.7,
+          credits: 15,
+          category: "Audio",
+        },
+        {
+          id: "text-to-speech",
+          name: "Text to Speech",
+          icon: "📢",
+          description: "Natural sounding voice synthesis",
+          rating: 4.6,
+          credits: 4,
+          category: "Audio",
+        },
+      ],
+    },
+    {
+      id: "deepseek",
+      name: "DeepSeek",
+      icon: "🦅",
+      category: "Language & Code",
+      models: [
+        {
+          id: "deepseek-coder",
+          name: "DeepSeek Coder",
+          icon: "💻",
+          description: "Specialized in programming and code generation",
+          rating: 4.5,
+          credits: 3,
+          category: "Programming",
+        },
+        {
+          id: "deepseek-v2",
+          name: "DeepSeek V2",
+          icon: "🌐",
+          description: "General purpose language model",
+          rating: 4.4,
+          credits: 2,
+          category: "Language",
+        },
+      ],
+    },
+    {
+      id: "mistral",
+      name: "Mistral AI",
+      icon: "🌪️",
+      category: "Language",
+      models: [
+        {
+          id: "mistral-large",
+          name: "Mistral Large",
+          icon: "💎",
+          description: "Top-tier reasoning capabilities",
+          rating: 4.6,
+          credits: 4,
+          category: "Language",
+        },
+        {
+          id: "mixtral",
+          name: "Mixtral 8x7B",
+          icon: "🎭",
+          description: "Mixture of experts model",
+          rating: 4.5,
+          credits: 3,
+          category: "Language",
+        },
+      ],
+    },
+    {
+      id: "runway",
+      name: "Runway",
+      icon: "🎬",
+      category: "Video",
+      models: [
+        {
+          id: "gen-2",
+          name: "Gen-2",
+          icon: "🎥",
+          description: "Text to video generation",
+          rating: 4.4,
+          credits: 12,
+          category: "Video",
+        },
+        {
+          id: "image-to-video",
+          name: "Image to Video",
+          icon: "🔄",
+          description: "Transform images into videos",
+          rating: 4.3,
+          credits: 8,
+          category: "Video",
+        },
+      ],
+    },
+  ];
+
+  // Get all models for display
+  const allModels = providers.flatMap((provider) =>
+    provider.models.map((model) => ({
+      ...model,
+      provider: provider.name,
+      providerIcon: provider.icon,
+    }))
+  );
+
+  // Filter models based on selection
+  const filteredModels = allModels.filter((model) => {
+    const matchesProvider =
+      selectedProvider === "all" ||
+      providers.find((p) => p.name === model.provider)?.id === selectedProvider;
+    const matchesSearch =
+      model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      model.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesProvider && matchesSearch;
+  });
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Head>
+        <title>AI Playstore - Unified AI Models Hub</title>
+        <meta name="description" content="Access all AI models in one place" />
+      </Head>
+
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center mr-3">
+                <span className="text-white font-bold text-sm">AI</span>
+              </div>
+              <h1 className="text-xl font-bold text-gray-900">AI Playstore</h1>
+            </div>
+
+            {/* Search Bar */}
+            <div className="flex-1 max-w-2xl mx-8">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search AI models..."
+                  className="w-full bg-gray-100 border-0 rounded-lg py-2 px-4 pl-10 focus:ring-2 focus:ring-purple-500 focus:bg-white"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <div className="absolute left-3 top-2.5">
+                  <span className="text-gray-400">🔍</span>
+                </div>
+              </div>
+            </div>
+
+            {/* User Actions */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center bg-gray-100 rounded-lg px-3 py-1">
+                <span className="text-sm text-gray-600 mr-2">Credits:</span>
+                <span className="font-semibold">1,250</span>
+              </div>
+              <button className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800">
+                Add Credits
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Provider Filter Tabs */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Providers
+          </h2>
+          <div className="flex space-x-2 overflow-x-auto pb-2">
+            <button
+              onClick={() => setSelectedProvider("all")}
+              className={`flex items-center px-4 py-2 rounded-lg whitespace-nowrap ${
+                selectedProvider === "all"
+                  ? "bg-purple-100 text-purple-700 border border-purple-200"
+                  : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              <span className="mr-2">📱</span>
+              All Models
+            </button>
+            {providers.map((provider) => (
+              <button
+                key={provider.id}
+                onClick={() => setSelectedProvider(provider.id)}
+                className={`flex items-center px-4 py-2 rounded-lg whitespace-nowrap ${
+                  selectedProvider === provider.id
+                    ? "bg-purple-100 text-purple-700 border border-purple-200"
+                    : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                <span className="mr-2">{provider.icon}</span>
+                {provider.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Models Grid */}
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {selectedProvider === "all"
+                ? "All AI Models"
+                : providers.find((p) => p.id === selectedProvider)?.name +
+                  " Models"}
+            </h2>
+            <div className="text-sm text-gray-500">
+              {filteredModels.length} models found
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredModels.map((model) => (
+              <div
+                key={model.id}
+                className="bg-white rounded-xl border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all duration-200"
+              >
+                <div className="p-5">
+                  {/* App Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center text-xl mr-3">
+                        {model.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {model.name}
+                        </h3>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <span className="mr-2">{model.providerIcon}</span>
+                          {model.provider}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center bg-green-50 px-2 py-1 rounded">
+                      <span className="text-green-600 font-semibold">
+                        {model.rating}
+                      </span>
+                      <span className="text-yellow-400 ml-1">★</span>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {model.description}
+                  </p>
+
+                  {/* Category & Credits */}
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium">
+                      {model.category}
+                    </span>
+                    <div className="text-sm font-semibold text-purple-600">
+                      {model.credits} credits
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-lg font-medium transition-colors text-sm">
+                    Use Model
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+            <div className="text-2xl font-bold text-gray-900">
+              {allModels.length}
+            </div>
+            <div className="text-gray-500 text-sm">AI Models</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+            <div className="text-2xl font-bold text-gray-900">
+              {providers.length}
+            </div>
+            <div className="text-gray-500 text-sm">Providers</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+            <div className="text-2xl font-bold text-gray-900">1</div>
+            <div className="text-gray-500 text-sm">Unified Account</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+            <div className="text-2xl font-bold text-gray-900">1</div>
+            <div className="text-gray-500 text-sm">Credit System</div>
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
