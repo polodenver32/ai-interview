@@ -18,7 +18,7 @@ export default function Home() {
         {
           id: "gpt-4",
           name: "GPT-4",
-          icon: "https://via.placeholder.com/48x48/10B981/FFFFFF?text=G4",
+          icon: "🧠",
           description: "Most capable AI model for complex tasks",
           rating: 4.9,
           credits: 5,
@@ -27,7 +27,7 @@ export default function Home() {
         {
           id: "gpt-3.5",
           name: "GPT-3.5 Turbo",
-          icon: "https://via.placeholder.com/48x48/3B82F6/FFFFFF?text=G3",
+          icon: "⚡",
           description: "Fast and efficient for everyday tasks",
           rating: 4.7,
           credits: 2,
@@ -36,7 +36,7 @@ export default function Home() {
         {
           id: "dall-e",
           name: "DALL-E 3",
-          icon: "https://via.placeholder.com/48x48/8B5CF6/FFFFFF?text=DE",
+          icon: "🎨",
           description: "Create images from text descriptions",
           rating: 4.8,
           credits: 8,
@@ -45,7 +45,7 @@ export default function Home() {
         {
           id: "whisper",
           name: "Whisper",
-          icon: "https://via.placeholder.com/48x48/EF4444/FFFFFF?text=W",
+          icon: "🎤",
           description: "Speech-to-text transcription",
           rating: 4.6,
           credits: 3,
@@ -62,7 +62,7 @@ export default function Home() {
         {
           id: "midjourney-v6",
           name: "MidJourney v6",
-          icon: "https://via.placeholder.com/48x48/7C3AED/FFFFFF?text=M6",
+          icon: "🖼️",
           description: "Latest version with enhanced realism",
           rating: 4.9,
           credits: 10,
@@ -71,7 +71,7 @@ export default function Home() {
         {
           id: "niji-journey",
           name: "Niji Journey",
-          icon: "https://via.placeholder.com/48x48/EC4899/FFFFFF?text=NJ",
+          icon: "🎎",
           description: "Anime and illustrative style generation",
           rating: 4.8,
           credits: 8,
@@ -88,7 +88,7 @@ export default function Home() {
         {
           id: "eleven-multilingual",
           name: "Eleven Multilingual v2",
-          icon: "https://via.placeholder.com/48x48/059669/FFFFFF?text=EM",
+          icon: "🌐",
           description: "Multilingual text-to-speech synthesis",
           rating: 4.7,
           credits: 6,
@@ -97,7 +97,7 @@ export default function Home() {
         {
           id: "voice-cloning",
           name: "Voice Cloning",
-          icon: "https://via.placeholder.com/48x48/DC2626/FFFFFF?text=VC",
+          icon: "👤",
           description: "Clone and replicate any voice",
           rating: 4.6,
           credits: 15,
@@ -114,7 +114,7 @@ export default function Home() {
         {
           id: "deepseek-coder",
           name: "DeepSeek Coder",
-          icon: "https://via.placeholder.com/48x48/0EA5E9/FFFFFF?text=DC",
+          icon: "💻",
           description: "Specialized in programming and code generation",
           rating: 4.5,
           credits: 3,
@@ -123,7 +123,7 @@ export default function Home() {
         {
           id: "deepseek-v2",
           name: "DeepSeek V2",
-          icon: "https://via.placeholder.com/48x48/0369A1/FFFFFF?text=DV",
+          icon: "🌐",
           description: "General purpose language model",
           rating: 4.4,
           credits: 2,
@@ -140,7 +140,7 @@ export default function Home() {
         {
           id: "mistral-large",
           name: "Mistral Large",
-          icon: "https://via.placeholder.com/48x48/7E22CE/FFFFFF?text=ML",
+          icon: "💎",
           description: "Top-tier reasoning capabilities",
           rating: 4.6,
           credits: 4,
@@ -149,7 +149,7 @@ export default function Home() {
         {
           id: "mixtral",
           name: "Mixtral 8x7B",
-          icon: "https://via.placeholder.com/48x48/A855F7/FFFFFF?text=MX",
+          icon: "🎭",
           description: "Mixture of experts model",
           rating: 4.5,
           credits: 3,
@@ -166,7 +166,7 @@ export default function Home() {
         {
           id: "gen-2",
           name: "Gen-2",
-          icon: "https://via.placeholder.com/48x48/EA580C/FFFFFF?text=G2",
+          icon: "🎥",
           description: "Text to video generation",
           rating: 4.4,
           credits: 12,
@@ -175,7 +175,7 @@ export default function Home() {
         {
           id: "image-to-video",
           name: "Image to Video",
-          icon: "https://via.placeholder.com/48x48/C2410C/FFFFFF?text=IV",
+          icon: "🔄",
           description: "Transform images into videos",
           rating: 4.3,
           credits: 8,
@@ -204,6 +204,13 @@ export default function Home() {
       model.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesProvider && matchesSearch;
   });
+
+  // Handle model click - for navigation to detail page
+  const handleModelClick = (modelId) => {
+    // This would navigate to the model detail page
+    console.log(`Navigating to model: ${modelId}`);
+    // In a real app: router.push(`/models/${modelId}`)
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -311,17 +318,16 @@ export default function Home() {
             {filteredModels.map((model) => (
               <div
                 key={model.id}
-                className="bg-white rounded-xl border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all duration-200"
+                onClick={() => handleModelClick(model.id)}
+                className="bg-white rounded-xl border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all duration-200 cursor-pointer"
               >
                 <div className="p-5">
                   {/* App Header */}
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center">
-                      <img
-                        src={model.icon}
-                        alt={model.name}
-                        className="w-12 h-12 rounded-xl mr-3"
-                      />
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center text-xl mr-3">
+                        {model.icon}
+                      </div>
                       <div>
                         <h3 className="font-semibold text-gray-900">
                           {model.name}
@@ -350,7 +356,7 @@ export default function Home() {
                   </p>
 
                   {/* Category & Credits */}
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center">
                     <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium">
                       {model.category}
                     </span>
@@ -358,11 +364,6 @@ export default function Home() {
                       {model.credits} credits
                     </div>
                   </div>
-
-                  {/* Action Button */}
-                  <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-lg font-medium transition-colors text-sm">
-                    Use Model
-                  </button>
                 </div>
               </div>
             ))}
