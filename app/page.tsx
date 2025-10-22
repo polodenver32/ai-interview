@@ -12,13 +12,13 @@ export default function Home() {
     {
       id: "openai",
       name: "OpenAI",
-      icon: "🔵",
+      icon: "https://th.bing.com/th?q=Chatgpt+Logo+White+PNG&w=120&h=120&c=1&rs=1&qlt=70&o=7&cb=1&pid=InlineBlock&rm=3&mkt=en-IN&cc=IN&setlang=en&adlt=moderate&t=1&mw=247",
       category: "Language & Image",
       models: [
         {
           id: "gpt-4",
           name: "GPT-4",
-          icon: "🧠",
+          icon: "https://via.placeholder.com/48x48/10B981/FFFFFF?text=G4",
           description: "Most capable AI model for complex tasks",
           rating: 4.9,
           credits: 5,
@@ -27,7 +27,7 @@ export default function Home() {
         {
           id: "gpt-3.5",
           name: "GPT-3.5 Turbo",
-          icon: "⚡",
+          icon: "https://via.placeholder.com/48x48/3B82F6/FFFFFF?text=G3",
           description: "Fast and efficient for everyday tasks",
           rating: 4.7,
           credits: 2,
@@ -36,7 +36,7 @@ export default function Home() {
         {
           id: "dall-e",
           name: "DALL-E 3",
-          icon: "🎨",
+          icon: "https://via.placeholder.com/48x48/8B5CF6/FFFFFF?text=DE",
           description: "Create images from text descriptions",
           rating: 4.8,
           credits: 8,
@@ -45,7 +45,7 @@ export default function Home() {
         {
           id: "whisper",
           name: "Whisper",
-          icon: "🎤",
+          icon: "https://via.placeholder.com/48x48/EF4444/FFFFFF?text=W",
           description: "Speech-to-text transcription",
           rating: 4.6,
           credits: 3,
@@ -56,13 +56,13 @@ export default function Home() {
     {
       id: "midjourney",
       name: "MidJourney",
-      icon: "🌈",
+      icon: "https://th.bing.com/th?q=Mid-Journey+Logo+No+Background&w=120&h=120&c=1&rs=1&qlt=70&o=7&cb=1&pid=InlineBlock&rm=3&mkt=en-IN&cc=IN&setlang=en&adlt=moderate&t=1&mw=247",
       category: "Image",
       models: [
         {
           id: "midjourney-v6",
           name: "MidJourney v6",
-          icon: "🖼️",
+          icon: "https://via.placeholder.com/48x48/7C3AED/FFFFFF?text=M6",
           description: "Latest version with enhanced realism",
           rating: 4.9,
           credits: 10,
@@ -71,7 +71,7 @@ export default function Home() {
         {
           id: "niji-journey",
           name: "Niji Journey",
-          icon: "🎎",
+          icon: "https://via.placeholder.com/48x48/EC4899/FFFFFF?text=NJ",
           description: "Anime and illustrative style generation",
           rating: 4.8,
           credits: 8,
@@ -82,25 +82,25 @@ export default function Home() {
     {
       id: "elevenlabs",
       name: "ElevenLabs",
-      icon: "🔊",
+      icon: "https://th.bing.com/th/id/ODLS.eb4d2bdc-b09b-4c2a-a542-b83c7d5afa00?w=32&h=32&o=6&cb=12&pid=AdsPlus",
       category: "Audio",
       models: [
         {
-          id: "voice-cloning",
-          name: "Voice Cloning",
-          icon: "👤",
-          description: "Clone and replicate any voice",
+          id: "eleven-multilingual",
+          name: "Eleven Multilingual v2",
+          icon: "https://via.placeholder.com/48x48/059669/FFFFFF?text=EM",
+          description: "Multilingual text-to-speech synthesis",
           rating: 4.7,
-          credits: 15,
+          credits: 6,
           category: "Audio",
         },
         {
-          id: "text-to-speech",
-          name: "Text to Speech",
-          icon: "📢",
-          description: "Natural sounding voice synthesis",
+          id: "voice-cloning",
+          name: "Voice Cloning",
+          icon: "https://via.placeholder.com/48x48/DC2626/FFFFFF?text=VC",
+          description: "Clone and replicate any voice",
           rating: 4.6,
-          credits: 4,
+          credits: 15,
           category: "Audio",
         },
       ],
@@ -108,13 +108,13 @@ export default function Home() {
     {
       id: "deepseek",
       name: "DeepSeek",
-      icon: "🦅",
+      icon: "https://th.bing.com/th/id/ODF.YxK1MUJaRoBfBG4UGNrXAA?w=32&h=32&qlt=90&pcl=fffffc&o=6&cb=12&pid=1.2",
       category: "Language & Code",
       models: [
         {
           id: "deepseek-coder",
           name: "DeepSeek Coder",
-          icon: "💻",
+          icon: "https://via.placeholder.com/48x48/0EA5E9/FFFFFF?text=DC",
           description: "Specialized in programming and code generation",
           rating: 4.5,
           credits: 3,
@@ -123,7 +123,7 @@ export default function Home() {
         {
           id: "deepseek-v2",
           name: "DeepSeek V2",
-          icon: "🌐",
+          icon: "https://via.placeholder.com/48x48/0369A1/FFFFFF?text=DV",
           description: "General purpose language model",
           rating: 4.4,
           credits: 2,
@@ -134,13 +134,13 @@ export default function Home() {
     {
       id: "mistral",
       name: "Mistral AI",
-      icon: "🌪️",
+      icon: "https://th.bing.com/th/id/ODF.d2MUKyqVdf-YIWDLkq6srg?w=32&h=32&qlt=90&pcl=fffffa&o=6&cb=12&pid=1.2",
       category: "Language",
       models: [
         {
           id: "mistral-large",
           name: "Mistral Large",
-          icon: "💎",
+          icon: "https://via.placeholder.com/48x48/7E22CE/FFFFFF?text=ML",
           description: "Top-tier reasoning capabilities",
           rating: 4.6,
           credits: 4,
@@ -149,7 +149,7 @@ export default function Home() {
         {
           id: "mixtral",
           name: "Mixtral 8x7B",
-          icon: "🎭",
+          icon: "https://via.placeholder.com/48x48/A855F7/FFFFFF?text=MX",
           description: "Mixture of experts model",
           rating: 4.5,
           credits: 3,
@@ -160,13 +160,13 @@ export default function Home() {
     {
       id: "runway",
       name: "Runway",
-      icon: "🎬",
+      icon: "https://th.bing.com/th/id/ODF.lU0e8Zv_Hc2RxwgY3bXKDw?w=32&h=32&qlt=90&pcl=fffffa&o=6&cb=12&pid=1.2",
       category: "Video",
       models: [
         {
           id: "gen-2",
           name: "Gen-2",
-          icon: "🎥",
+          icon: "https://via.placeholder.com/48x48/EA580C/FFFFFF?text=G2",
           description: "Text to video generation",
           rating: 4.4,
           credits: 12,
@@ -175,7 +175,7 @@ export default function Home() {
         {
           id: "image-to-video",
           name: "Image to Video",
-          icon: "🔄",
+          icon: "https://via.placeholder.com/48x48/C2410C/FFFFFF?text=IV",
           description: "Transform images into videos",
           rating: 4.3,
           credits: 8,
@@ -282,7 +282,11 @@ export default function Home() {
                     : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
                 }`}
               >
-                <span className="mr-2">{provider.icon}</span>
+                <img
+                  src={provider.icon}
+                  alt={provider.name}
+                  className="w-4 h-4 mr-2 rounded"
+                />
                 {provider.name}
               </button>
             ))}
@@ -313,15 +317,21 @@ export default function Home() {
                   {/* App Header */}
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center text-xl mr-3">
-                        {model.icon}
-                      </div>
+                      <img
+                        src={model.icon}
+                        alt={model.name}
+                        className="w-12 h-12 rounded-xl mr-3"
+                      />
                       <div>
                         <h3 className="font-semibold text-gray-900">
                           {model.name}
                         </h3>
                         <div className="flex items-center text-sm text-gray-500">
-                          <span className="mr-2">{model.providerIcon}</span>
+                          <img
+                            src={model.providerIcon}
+                            alt={model.provider}
+                            className="w-3 h-3 mr-1 rounded"
+                          />
                           {model.provider}
                         </div>
                       </div>
