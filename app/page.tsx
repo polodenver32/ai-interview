@@ -4,7 +4,7 @@ import Head from "next/head";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTooltip, setActiveTooltip] = useState(null);
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
   const sections = [
     {
@@ -145,7 +145,7 @@ export default function Home() {
     },
   ];
 
-  const handleModelClick = (modelId) => {
+  const handleModelClick = (modelId: string) => {
     console.log(`Navigating to model: ${modelId}`);
   };
 

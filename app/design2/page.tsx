@@ -206,7 +206,7 @@ export default function Home() {
   });
 
   // Handle model click - for navigation to detail page
-  const handleModelClick = (modelId) => {
+  const handleModelClick = (modelId: string) => {
     // This would navigate to the model detail page
     console.log(`Navigating to model: ${modelId}`);
     // In a real app: router.push(`/models/${modelId}`)

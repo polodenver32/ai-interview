@@ -191,7 +191,7 @@ export default function Home() {
   });
 
   // Handle model click - for navigation to detail page
-  const handleModelClick = (modelId) => {
+  const handleModelClick = (modelId: string) => {
     console.log(`Navigating to model: ${modelId}`);
   };
 
